@@ -71,11 +71,11 @@ fetch (apiUrlUser)
         return response.json();
     })
     .then(data => {
-        // console.log('User Data from your API:', data); // DEBUG YOUR API RESPONSE HERE
+        // console.log('User Data from your API:', data); 
 
         nameElem.innerText = data.username || 'User';
         tagElem.innerText = data.username ? `@${data.username}` : '@username';
-        if (data.avatar_url) { // Your API uses avatar_url
+        if (data.avatar_url) { 
             avatarElem.setAttribute('src', data.avatar_url);
         } else {
             avatarElem.setAttribute('src', 'Source/IMG/default-avatar.png');
@@ -94,16 +94,14 @@ fetch (apiUrlUser)
         }
 
         let currentDiscordStatus = data.status || "offline"; 
-        const validStatuses = ["online", "idle", "dnd", "offline", "unknown"];
+        const validStatuses = ["online", "idle", "dnd", "offline"]; // "unknown" will be treated as offline
         let statusForIcon = currentDiscordStatus.toLowerCase();
         if (!validStatuses.includes(statusForIcon)) {
             statusForIcon = "offline"; 
         }
-        if (statusForIcon === "unknown") statusForIcon = "offline";
-
-
+        // Assuming your status images are named online.png, idle.png, dnd.png, offline.png
         if (statusIconElem) {
-            statusIconElem.setAttribute('src', `Source/IMG/${statusForIcon}.png`); // Assuming PNG now
+            statusIconElem.setAttribute('src', `Source/IMG/${statusForIcon}.png`); 
             statusIconElem.setAttribute('alt', currentDiscordStatus);
         }
         
@@ -118,14 +116,29 @@ fetch (apiUrlUser)
         if (data.activities && data.activities.length > 0) {
             const customActivity = data.activities.find(act => act.type === "Custom" && (act.state || act.name) );
             if (customActivity) {
-                customStatusTextForPFPBubble = `${customActivity.emoji ? customActivity.emoji.name + ' ' : ''}${act.state || act.name}`;
+                customStatusTextForPFPBubble = `${customActivity.emoji ? customActivity.emoji.name + ' ' : ''}${customActivity.state || customActivity.name}`;
             }
 
             data.activities.forEach(act => {
-                let activityString = `<strong>${act.type}:</strong> ${act.name || ''}`;
-                if (act.details) activityString += ` <span class="activity-details">(${act.details})</span>`;
-                if (act.state && act.type !== "Custom") activityString += ` <span class="activity-details">- ${act.state}</span>`; // Add state if not custom and exists
-                allActivitiesForExternalBubble.push(`<li>${activityString}</li>`);
+                let activityDisplayHtml;
+                if (act.type === "Custom") {
+                    const emojiName = act.emoji && act.emoji.name ? act.emoji.name + ' ' : '';
+                    const stateText = act.state || ''; 
+                    // For the external list, show Type: Emoji + State for custom status
+                    activityDisplayHtml = `<strong>${act.type}:</strong> ${emojiName}${stateText}`;
+                    if (!stateText && !emojiName && act.name) { // Fallback if state and emoji are empty, use name
+                         activityDisplayHtml = `<strong>${act.type}:</strong> ${act.name}`;
+                    } else if (!stateText && !emojiName && !act.name) { // Completely empty custom status
+                        activityDisplayHtml = `<strong>${act.type}:</strong> (empty)`;
+                    }
+                } else {
+                    // For other activities like Playing, Listening, Streaming
+                    let baseString = `<strong>${act.type}:</strong> ${act.name || ''}`;
+                    if (act.details) baseString += ` <span class="activity-details">(${act.details})</span>`;
+                    if (act.state) baseString += ` <span class="activity-details">- ${act.state}</span>`;
+                    activityDisplayHtml = baseString;
+                }
+                allActivitiesForExternalBubble.push(`<li>${activityDisplayHtml}</li>`);
 
                 // Determine main activity for the card (prioritize non-custom)
                 if (!mainActivityTextForCard && act.type !== "Custom") {
@@ -133,9 +146,8 @@ fetch (apiUrlUser)
                 }
             });
             
-            // If only custom status, use it for main activity text on card
             if (!mainActivityTextForCard && customActivity) {
-                mainActivityTextForCard = customActivity.name; // Or customStatusTextForPFPBubble
+                mainActivityTextForCard = customActivity.name; // For the card, usually "Custom Status" is enough if it's the main one
             }
         }
         
@@ -147,7 +159,7 @@ fetch (apiUrlUser)
                  customStatusBubbleElem.style.display = 'none';
             }
         }
-        if (activityStatusElem) { // This is the one on the card
+        if (activityStatusElem) { 
             activityStatusElem.innerText = mainActivityTextForCard;
         }
         
@@ -176,7 +188,8 @@ fetch (apiUrlUser)
         if (myStatusElem) myStatusElem.innerText = ""; 
         if (activityStatusElem) activityStatusElem.innerText = ""; 
         if (customStatusBubbleElem) customStatusBubbleElem.style.display = 'none';
-        if (statusIconElem) statusIconElem.setAttribute('src', 'Source/IMG/offline-status.png');
+        // Ensure this path matches your actual offline status image, e.g., 'Source/IMG/offline.png'
+        if (statusIconElem) statusIconElem.setAttribute('src', 'Source/IMG/offline.png'); 
         if (joinedDateTextElem) joinedDateTextElem.innerText = "Joined Discord: Error";
         if (externalActivityListElem) externalActivityListElem.innerHTML = "<li>Could not load activities.</li>";
     });
