@@ -55,7 +55,7 @@ const externalActivityListElem = _ID('activity-list'); // For the new external b
 
 // --- API ---
 const yourDiscordUserID = '591534252307513347';
-const apiUrlUser = `http://40.233.67.186:3009/v1/api/user/${yourDiscordUserID}`; 
+const apiUrlUser = `https://40.233.67.186:3009/v1/api/user/${yourDiscordUserID}`; 
 const apiUrlServer = 'https://canary.discord.com/api/v10/invites/kHQjhXnxkM?with_counts=true';
 
 if (myStatusElem) myStatusElem.innerText = ""; 
